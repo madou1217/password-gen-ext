@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "随机密码生成器",
+    "description": "扩展名称"
+  },
+  "appDesc": {
+    "message": "为密码输入框生成随机密码",
+    "description": "扩展描述"
+  },
+  "passwordPatterns": {
+    "message": "password,passwd,pwd,pass,passcode,密码,口令,暗码,密匙,验证码",
+    "description": "常见密码字段标识符（逗号分隔）"
+  }
+} 

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>随机密码生成器</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --primary-dark: #3367d6;
+      --danger-color: #f44336;
+      --success-color: #4CAF50;
+      --warning-color: #FFC107;
+      --text-color: #333;
+      --light-text: #666;
+      --border-color: #ddd;
+      --bg-light: #f5f5f5;
+      --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      width: 400px;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      color: var(--text-color);
+      background-color: #fff;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 15px;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .tab:hover {
+      color: var(--primary-color);
+    }
+    
+    .tab.active {
+      border-bottom: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    h1 {
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: var(--text-color);
+    }
+    
+    .password-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .password-input-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .password-field {
+      position: relative;
+      flex: 1;
+    }
+    
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+      font-family: 'Consolas', monospace;
+    }
+    
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--light-text);
+      transition: color 0.2s ease;
+    }
+    
+    .toggle-password:hover {
+      color: var(--primary-color);
+    }
+    
+    button {
+      padding: 10px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    button:active {
+      transform: scale(0.97);
+    }
+    
+    .settings {
+      background-color: var(--bg-light);
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    
+    .settings-row {
+      display: flex;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    
+    .settings-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .settings-label {
+      flex: 0 0 100px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .checkbox-label:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .checkbox-icon {
+      display: inline-block;
+      min-width: 28px;
+      height: 20px;
+      background: var(--success-color);
+      color: white;
+      font-size: 12px;
+      text-align: center;
+      line-height: 20px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    
+    .length-range {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .length-range input[type="range"] {
+      flex: 1;
+      height: 5px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+      border-radius: 5px;
+    }
+    
+    .length-range input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .info {
+      font-size: 13px;
+      color: var(--light-text);
+      margin-top: 10px;
+      padding: 10px;
+      background-color: rgba(66, 133, 244, 0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .info i {
+      color: var(--primary-color);
+    }
+    
+    .history-list {
+      max-height: 350px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    
+    .history-item {
+      padding: 14px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s ease;
+    }
+    
+    .history-item:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    
+    .site-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    
+    .site-domain {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .timestamp {
+      font-size: 12px;
+      color: var(--light-text);
+    }
+    
+    .password-value {
+      position: relative;
+      font-family: 'Consolas', monospace;
+      background: var(--bg-light);
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      word-break: break-all;
+    }
+    
+    .password-mask {
+      letter-spacing: 2px;
+    }
+    
+    .password-actions {
+      display: flex;
+      gap: 5px;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    
+    .small-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      min-width: auto;
+    }
+    
+    .small-btn:hover {
+      background-color: rgba(66, 133, 244, 0.1);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--light-text);
+    }
+    
+    .empty-state i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+    
+    .empty-state p {
+      margin: 5px 0 0;
+    }
+    
+    .notification {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 90%;
+    }
+    
+    .notification.show {
+      opacity: 1;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+    
+    .exclude-chars {
+      width: 100%;
+      letter-spacing: 1px;
+    }
+    
+    .password-strength {
+      height: 6px;
+      width: 100%;
+      background-color: #eee;
+      margin-top: 8px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .strength-meter {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s, background-color 0.3s;
+    }
+    
+    .strength-text {
+      font-size: 12px;
+      color: var(--light-text);
+      text-align: right;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    
+    .weak { background-color: var(--danger-color); }
+    .medium { background-color: var(--warning-color); }
+    .strong { background-color: var(--success-color); }
+    .very-strong { background-color: #2E7D32; }
+    
+    .hidden-records {
+      cursor: pointer;
+      color: var(--primary-color);
+      font-size: 13px;
+      margin-top: 6px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      transition: background-color 0.2s ease;
+      border-radius: 4px;
+    }
+    
+    .hidden-records:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .hidden-records i {
+      margin-right: 5px;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .history-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .toggle-all-passwords {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .toggle-all-passwords:hover {
+      background-color: rgba(66, 133, 244, 0.1);
+    }
+    
+    /* 自定义滚动条 */
+    .history-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .history-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .history-list::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    
+    .history-list::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab="generator">密码生成器</div>
+      <div class="tab" data-tab="history">历史记录</div>
+    </div>
+    
+    <div class="tab-content active" id="generator-tab">
+      <h1>随机密码生成器</h1>
+      
+      <div class="password-container">
+        <div class="password-input-group">
+          <div class="password-field">
+            <input type="text" id="password" readonly>
+          </div>
+          <button id="generateBtn">
+            <i class="fas fa-sync-alt"></i> 生成
+          </button>
+          <button id="copyBtn">
+            <i class="fas fa-copy"></i> 复制
+          </button>
+        </div>
+        
+        <div class="password-strength">
+          <div class="strength-meter" id="strengthMeter"></div>
+        </div>
+        <div class="strength-text" id="strengthText"></div>
+      </div>
+      
+      <div class="settings">
+        <div class="settings-row">
+          <div class="settings-label">使用字符:</div>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="useNumbers" checked>
+              <span class="checkbox-icon">0-9</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="useLowercase" checked>
+              <span class="checkbox-icon">a-z</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="useUppercase" checked>
+              <span class="checkbox-icon">A-Z</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="useSymbols" checked>
+              <span class="checkbox-icon">!@#</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="settings-row">
+          <div class="settings-label">密码长度:</div>
+          <div class="length-range">
+            <input type="range" id="passwordLengthSlider" min="8" max="32" value="8">
+            <input type="number" id="passwordLength" min="8" max="32" value="8" style="width: 60px;">
+          </div>
+        </div>
+        
+        <div class="settings-row">
+          <div class="settings-label">排除字符:</div>
+          <input type="text" id="excludeChars" class="exclude-chars" placeholder="例如: A10B" value="">
+        </div>
+      </div>
+      
+      <div class="info">
+        <i class="fas fa-info-circle"></i>
+        在密码输入框上右键点击并选择"生成随机密码"，可以直接填充密码
+      </div>
+    </div>
+    
+    <div class="tab-content" id="history-tab">
+      <div class="history-header">
+        <h1>密码历史记录</h1>
+        <div class="history-actions">
+          <button id="toggleAllPasswordsBtn" class="toggle-all-passwords">
+            <i class="fas fa-eye"></i> 全部显示
+          </button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList">
+        <!-- 历史记录由JavaScript动态填充 -->
+        <div class="empty-state">
+          <i class="fas fa-history"></i>
+          <p>暂无历史记录</p>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button id="clearHistoryBtn" class="small-btn" style="background-color: var(--danger-color); color: white; border: none;">
+          <i class="fas fa-trash-alt"></i> 清空记录
+        </button>
+        <button id="exportBtn">
+          <i class="fas fa-file-export"></i> 导出记录
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notification" id="notification"></div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 
