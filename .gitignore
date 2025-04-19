@@ -1,0 +1,30 @@
+# JetBrains/IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iws
+.idea_modules/
+out/
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# VSCode
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+.history
+.ionide
+
+# Cursor (based on VSCode)
+.cursor/
+.cursor-data/
+
