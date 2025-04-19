@@ -10,5 +10,195 @@
   "passwordPatterns": {
     "message": "password,passwd,pwd,pass,passcode",
     "description": "Comma-separated list of common password field identifiers in English"
+  },
+  "generateTab": {
+    "message": "Password Generator",
+    "description": "Tab name for password generator"
+  },
+  "historyTab": {
+    "message": "History",
+    "description": "Tab name for password history"
+  },
+  "generateBtnText": {
+    "message": "Generate",
+    "description": "Button text for generate password"
+  },
+  "copyBtnText": {
+    "message": "Copy",
+    "description": "Button text for copy password"
+  },
+  "copiedText": {
+    "message": "Copied",
+    "description": "Text shown after copying password"
+  },
+  "useCharsText": {
+    "message": "Character Types:",
+    "description": "Label for character types selection"
+  },
+  "passwordLengthText": {
+    "message": "Password Length:",
+    "description": "Label for password length setting"
+  },
+  "excludeCharsText": {
+    "message": "Exclude Characters:",
+    "description": "Label for exclude characters setting"
+  },
+  "enableHistoryText": {
+    "message": "Enable History:",
+    "description": "Label for history toggle switch"
+  },
+  "enableHistoryDescription": {
+    "message": "Save generated passwords to local history",
+    "description": "Description for history functionality"
+  },
+  "historyDisabledText": {
+    "message": "History feature is disabled",
+    "description": "Text shown when history feature is disabled"
+  },
+  "excludeCharsPlaceholder": {
+    "message": "e.g.: A10B",
+    "description": "Placeholder for exclude characters input"
+  },
+  "rightClickTipText": {
+    "message": "Right-click on any password field and select 'Generate random password' to fill in a password",
+    "description": "Tip text for right-click usage"
+  },
+  "passwordHistoryText": {
+    "message": "Password History",
+    "description": "Title for password history section"
+  },
+  "showAllText": {
+    "message": "Show All",
+    "description": "Text for show all passwords button"
+  },
+  "hideAllText": {
+    "message": "Hide All",
+    "description": "Text for hide all passwords button"
+  },
+  "clearHistoryText": {
+    "message": "Clear History",
+    "description": "Text for clear history button"
+  },
+  "exportText": {
+    "message": "Export Records",
+    "description": "Text for export records button"
+  },
+  "emptyHistoryText": {
+    "message": "No history records",
+    "description": "Text shown when history is empty"
+  },
+  "passwordStrengthText": {
+    "message": "Password Strength: $STRENGTH$",
+    "description": "Text for password strength indicator",
+    "placeholders": {
+      "strength": {
+        "content": "$1"
+      }
+    }
+  },
+  "weakText": {
+    "message": "Weak",
+    "description": "Text for weak password strength"
+  },
+  "mediumText": {
+    "message": "Medium",
+    "description": "Text for medium password strength"
+  },
+  "strongText": {
+    "message": "Strong",
+    "description": "Text for strong password strength"
+  },
+  "veryStrongText": {
+    "message": "Very Strong",
+    "description": "Text for very strong password strength"
+  },
+  "errorCharTypeRequired": {
+    "message": "Error: Please select at least one character type",
+    "description": "Error message when no character type is selected"
+  },
+  "errorTooManyExcluded": {
+    "message": "Error: Too many excluded characters, cannot generate password",
+    "description": "Error message when too many characters are excluded"
+  },
+  "copiedToClipboard": {
+    "message": "Password copied to clipboard",
+    "description": "Notification message after copying password"
+  },
+  "copyFailedText": {
+    "message": "Copy failed, please copy manually",
+    "description": "Message shown when copying fails"
+  },
+  "confirmClearHistory": {
+    "message": "Are you sure you want to clear all password history? This action cannot be undone.",
+    "description": "Confirmation message for clearing history"
+  },
+  "allHistoryCleared": {
+    "message": "All password history has been cleared",
+    "description": "Message shown after clearing all history"
+  },
+  "noHistoryToExport": {
+    "message": "No history records to export",
+    "description": "Message shown when trying to export empty history"
+  },
+  "historyExported": {
+    "message": "History records exported",
+    "description": "Message shown after exporting history"
+  },
+  "moreRecordsText": {
+    "message": "$COUNT$ more records, click to expand",
+    "description": "Text for showing more records button",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "collapseRecordsText": {
+    "message": "Click to collapse",
+    "description": "Text for collapsing expanded records"
+  },
+  "noPasswordFieldFound": {
+    "message": "No password field found. Please make sure the cursor is in a password field.",
+    "description": "Message shown when no password field is found"
+  },
+  "passwordGeneratedAndCopied": {
+    "message": "Password generated and copied to clipboard",
+    "description": "Message shown when password is generated and copied successfully"
+  },
+  "passwordGeneratedCopyFailed": {
+    "message": "Password generated, but copy failed. Please copy manually.",
+    "description": "Message shown when password is generated but copying failed"
+  },
+  "clipboardOperationFailed": {
+    "message": "Password generated, but clipboard operation failed. Please copy manually.",
+    "description": "Message shown when clipboard operation fails"
+  },
+  "passwordSavedToHistory": {
+    "message": "Password saved to history",
+    "description": "Console log message when password is saved to history"
+  },
+  "passwordDuplicate": {
+    "message": "Skipping duplicate password record",
+    "description": "Console log message when duplicate password is skipped"
+  },
+  "passwordDuplicateUpdated": {
+    "message": "Updated timestamp of duplicate password and moved to top",
+    "description": "Console log message when duplicate password is updated"
+  },
+  "passwordMask": {
+    "message": "••••••••••••",
+    "description": "Mask used to hide passwords"
+  },
+  "csvHeaderRow": {
+    "message": "domain,url,password,timestamp",
+    "description": "Header row for CSV export file"
+  },
+  "csvExportFilename": {
+    "message": "password_history.csv",
+    "description": "Default filename for CSV export"
+  },
+  "contextMenuGeneratePassword": {
+    "message": "Generate random password",
+    "description": "Context menu item for generating random password"
   }
 } 

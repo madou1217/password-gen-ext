@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ success: true, element: "possiblePasswordField" });
         } else {
           console.log("没有找到密码输入框");
-          showNotification("未找到密码输入框，请确认光标在密码框内");
+          showNotification(chrome.i18n.getMessage("noPasswordFieldFound"));
           sendResponse({ success: false, reason: "noPasswordField" });
         }
       }
@@ -202,15 +202,15 @@ function fillPasswordIntoField(inputField, password) {
     navigator.clipboard.writeText(password)
       .then(() => {
         // 显示复制成功的提示
-        showNotification("密码已生成并复制到剪贴板");
+        showNotification(chrome.i18n.getMessage("passwordGeneratedAndCopied"));
       })
       .catch(err => {
         console.error("复制到剪贴板失败: ", err);
-        showNotification("密码已生成，但复制失败，请手动复制");
+        showNotification(chrome.i18n.getMessage("passwordGeneratedCopyFailed"));
       });
   } catch (error) {
     console.error("复制到剪贴板操作异常: ", error);
-    showNotification("密码已生成，但操作剪贴板失败，请手动复制");
+    showNotification(chrome.i18n.getMessage("clipboardOperationFailed"));
   }
     
   // 尝试查找并填充确认密码字段

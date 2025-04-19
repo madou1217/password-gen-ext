@@ -2,13 +2,13 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "generatePassword",
-    title: "生成随机密码",
+    title: chrome.i18n.getMessage("contextMenuGeneratePassword"),
     contexts: ["editable"],
     documentUrlPatterns: ["<all_urls>"]
   });
   
   // 初始化用户设置（如果不存在）
-  chrome.storage.local.get(['passwordSettings'], function(result) {
+  chrome.storage.local.get(['passwordSettings', 'enableHistory'], function(result) {
     if (!result.passwordSettings) {
       chrome.storage.local.set({
         passwordSettings: {
@@ -20,6 +20,11 @@ chrome.runtime.onInstalled.addListener(() => {
           excludeChars: ""
         }
       });
+    }
+    
+    // 如果enableHistory设置不存在，默认设置为false（禁用）
+    if (result.enableHistory === undefined) {
+      chrome.storage.local.set({enableHistory: false});
     }
   });
 });
@@ -169,65 +174,74 @@ function generateRandomPassword(options = {}) {
 function savePasswordToHistory(password, tabInfo) {
   if (!tabInfo || !tabInfo.url) return;
   
-  try {
-    const url = new URL(tabInfo.url);
-    const domain = url.hostname;
-    const timestamp = new Date().toISOString();
-    const favicon = tabInfo.favIconUrl || '';
+  // 检查是否启用了历史记录
+  chrome.storage.local.get(['enableHistory'], function(result) {
+    // 如果未启用历史记录，则不保存
+    if (result.enableHistory === false) {
+      console.log('History saving is disabled');
+      return;
+    }
     
-    // 获取现有历史记录
-    chrome.storage.local.get(['passwordHistory'], function(result) {
-      let history = result.passwordHistory || [];
+    try {
+      const url = new URL(tabInfo.url);
+      const domain = url.hostname;
+      const timestamp = new Date().toISOString();
+      const favicon = tabInfo.favIconUrl || '';
       
-      // 检查是否已存在相同域名和密码的记录
-      const isDuplicate = history.some(item => 
-        item.domain === domain && item.password === password
-      );
-      
-      // 如果不是重复记录，才添加
-      if (!isDuplicate) {
-        // 添加新记录
-        history.unshift({
-          domain: domain,
-          url: tabInfo.url,
-          password: password,
-          timestamp: timestamp,
-          favicon: favicon
-        });
+      // 获取现有历史记录
+      chrome.storage.local.get(['passwordHistory'], function(result) {
+        let history = result.passwordHistory || [];
         
-        // 限制历史记录数量
-        if (history.length > 100) {
-          history = history.slice(0, 100);
-        }
-        
-        // 保存历史记录
-        chrome.storage.local.set({passwordHistory: history});
-      } else {
-        console.log('跳过重复密码记录');
-        
-        // 找到现有记录的索引
-        const existingIndex = history.findIndex(item => 
+        // 检查是否已存在相同域名和密码的记录
+        const isDuplicate = history.some(item => 
           item.domain === domain && item.password === password
         );
         
-        // 如果找到了记录并且不在首位，将它移到首位并更新时间戳
-        if (existingIndex > 0) {
-          const existingRecord = history[existingIndex];
-          // 更新时间戳
-          existingRecord.timestamp = timestamp;
-          // 从当前位置移除
-          history.splice(existingIndex, 1);
-          // 添加到开头
-          history.unshift(existingRecord);
+        // 如果不是重复记录，才添加
+        if (!isDuplicate) {
+          // 添加新记录
+          history.unshift({
+            domain: domain,
+            url: tabInfo.url,
+            password: password,
+            timestamp: timestamp,
+            favicon: favicon
+          });
           
-          // 保存更新后的历史记录
+          // 限制历史记录数量
+          if (history.length > 100) {
+            history = history.slice(0, 100);
+          }
+          
+          // 保存历史记录
           chrome.storage.local.set({passwordHistory: history});
+        } else {
+          console.log('跳过重复密码记录');
+          
+          // 找到现有记录的索引
+          const existingIndex = history.findIndex(item => 
+            item.domain === domain && item.password === password
+          );
+          
+          // 如果找到了记录并且不在首位，将它移到首位并更新时间戳
+          if (existingIndex > 0) {
+            const existingRecord = history[existingIndex];
+            // 更新时间戳
+            existingRecord.timestamp = timestamp;
+            // 从当前位置移除
+            history.splice(existingIndex, 1);
+            // 添加到开头
+            history.unshift(existingRecord);
+            
+            // 保存更新后的历史记录
+            chrome.storage.local.set({passwordHistory: history});
+          }
         }
-      }
-    });
-  } catch (e) {
-    console.error('保存历史记录失败:', e);
-  }
+      });
+    } catch (e) {
+      console.error('保存历史记录失败:', e);
+    }
+  });
 }
 
 // 处理右键菜单点击事件

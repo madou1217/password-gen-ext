@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const useLowercaseCheckbox = document.getElementById('useLowercase');
   const useUppercaseCheckbox = document.getElementById('useUppercase');
   const useSymbolsCheckbox = document.getElementById('useSymbols');
+  const enableHistoryCheckbox = document.getElementById('enableHistory');
   const toggleAllPasswordsBtn = document.getElementById('toggleAllPasswordsBtn');
   const exportBtn = document.getElementById('exportBtn');
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
@@ -23,6 +24,106 @@ document.addEventListener('DOMContentLoaded', function() {
   // 全局变量
   let allPasswordsVisible = false;
 
+  // 初始化i18n文本
+  function initializeI18n() {
+    // 标签页文本
+    const generatorTab = document.querySelector('[data-tab="generator"]');
+    if (generatorTab) generatorTab.textContent = chrome.i18n.getMessage("generateTab");
+    
+    const historyTab = document.querySelector('[data-tab="history"]');
+    if (historyTab) historyTab.textContent = chrome.i18n.getMessage("historyTab");
+    
+    // 按钮文本
+    if (generateBtn) generateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> ' + chrome.i18n.getMessage("generateBtnText");
+    if (copyBtn) copyBtn.innerHTML = '<i class="fas fa-copy"></i> ' + chrome.i18n.getMessage("copyBtnText");
+    
+    // 设置标签
+    const settingsLabel1 = document.querySelector('.settings-label:nth-of-type(1)');
+    if (settingsLabel1) settingsLabel1.textContent = chrome.i18n.getMessage("useCharsText");
+    
+    const settingsLabel2 = document.querySelector('.settings-label:nth-of-type(2)');
+    if (settingsLabel2) settingsLabel2.textContent = chrome.i18n.getMessage("passwordLengthText");
+    
+    const settingsLabel3 = document.querySelector('.settings-label:nth-of-type(3)');
+    if (settingsLabel3) settingsLabel3.textContent = chrome.i18n.getMessage("excludeCharsText");
+    
+    // 历史记录开关设置标签
+    const settingsLabel4 = document.querySelector('.settings-label:nth-of-type(4)');
+    if (settingsLabel4) settingsLabel4.textContent = chrome.i18n.getMessage("enableHistoryText");
+    
+    // 历史记录开关描述
+    const enableHistoryDescription = document.querySelector('.toggle-switch .toggle-label');
+    if (enableHistoryDescription) enableHistoryDescription.textContent = chrome.i18n.getMessage("enableHistoryDescription");
+    
+    // 占位符
+    if (excludeCharsInput) excludeCharsInput.placeholder = chrome.i18n.getMessage("excludeCharsPlaceholder");
+    
+    // 提示信息
+    const infoElement = document.querySelector('.info');
+    if (infoElement) infoElement.innerHTML = '<i class="fas fa-info-circle"></i> ' + chrome.i18n.getMessage("rightClickTipText");
+    
+    // 历史记录
+    const historyTabHeader = document.querySelector('#history-tab h1');
+    if (historyTabHeader) historyTabHeader.textContent = chrome.i18n.getMessage("passwordHistoryText");
+    
+    if (toggleAllPasswordsBtn) toggleAllPasswordsBtn.innerHTML = '<i class="fas fa-eye"></i> ' + chrome.i18n.getMessage("showAllText");
+    
+    // 历史记录按钮
+    if (clearHistoryBtn) clearHistoryBtn.innerHTML = '<i class="fas fa-trash-alt"></i> ' + chrome.i18n.getMessage("clearHistoryText");
+    if (exportBtn) exportBtn.innerHTML = '<i class="fas fa-file-export"></i> ' + chrome.i18n.getMessage("exportText");
+    
+    // 空历史记录
+    const emptyState = document.querySelector('.empty-state p');
+    if (emptyState) emptyState.textContent = chrome.i18n.getMessage("emptyHistoryText");
+  }
+  
+  // 在DOM加载完成后初始化i18n
+  initializeI18n();
+  
+  // 加载历史记录设置
+  chrome.storage.local.get(['enableHistory'], function(result) {
+    // 如果之前保存过设置，则使用保存的设置
+    if (result.enableHistory !== undefined) {
+      enableHistoryCheckbox.checked = result.enableHistory;
+    }
+  });
+  
+  // 监听历史记录开关变化 - 更新文本并重新加载历史记录
+  enableHistoryCheckbox.addEventListener('change', function() {
+    // 如果从启用切换到禁用，且存在历史记录，则提示是否清空
+    if (this.checked === false) {
+      chrome.storage.local.get(['passwordHistory'], function(result) {
+        const history = result.passwordHistory || [];
+        
+        // 如果有历史记录，则提示是否清空
+        if (history.length > 0) {
+          if (confirm(chrome.i18n.getMessage('confirmClearHistory'))) {
+            // 清空历史记录
+            chrome.storage.local.remove(['passwordHistory'], function() {
+              console.log('历史记录已清空');
+              showNotification(chrome.i18n.getMessage('allHistoryCleared'));
+            });
+          }
+        }
+        
+        // 无论是否有历史记录，都保存设置
+        chrome.storage.local.set({enableHistory: false}, function() {
+          console.log('History setting saved:', false);
+        });
+      });
+    } else {
+      // 如果从禁用切换到启用，直接保存设置
+      chrome.storage.local.set({enableHistory: true}, function() {
+        console.log('History setting saved:', true);
+      });
+    }
+    
+    // 如果当前是历史标签页，则重新加载历史记录
+    if (document.querySelector('.tab[data-tab="history"]').classList.contains('active')) {
+      loadPasswordHistory();
+    }
+  });
+  
   // 同步密码长度输入框和滑块
   passwordLengthInput.addEventListener('input', function() {
     passwordLengthSlider.value = this.value;
@@ -82,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (tab.dataset.tab === 'history') {
         // 重置密码可见状态
         allPasswordsVisible = false;
-        toggleAllPasswordsBtn.innerHTML = '<i class="fas fa-eye"></i> 全部显示';
+        toggleAllPasswordsBtn.innerHTML = '<i class="fas fa-eye"></i> ' + chrome.i18n.getMessage("showAllText");
         
         // 加载历史记录
         loadPasswordHistory();
@@ -129,23 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
       charset = filteredCharset;
     }
     
-    // 如果没有选择任何字符集，使用默认值
+    // 如果没有选择任何字符集，返回空字符串
     if (!charset) {
-      charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      // 再次应用排除字符
-      if (excludeChars) {
-        let filteredCharset = '';
-        for (let i = 0; i < charset.length; i++) {
-          if (!excludeChars.includes(charset[i])) {
-            filteredCharset += charset[i];
-          }
-        }
-        charset = filteredCharset;
-      }
+      return "";
     }
     
     if (charset.length === 0) {
-      showNotification("错误：排除字符过多，无法生成密码");
+      showNotification(chrome.i18n.getMessage("errorTooManyExcluded"));
       return "";
     }
     
@@ -221,16 +312,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let percentage = 0;
     
     if (score <= 2) {
-      label = "弱";
+      label = chrome.i18n.getMessage("weakText");
       percentage = 25;
     } else if (score <= 4) {
-      label = "中";
+      label = chrome.i18n.getMessage("mediumText");
       percentage = 50;
     } else if (score <= 6) {
-      label = "强";
+      label = chrome.i18n.getMessage("strongText");
       percentage = 75;
     } else {
-      label = "非常强";
+      label = chrome.i18n.getMessage("veryStrongText");
       percentage = 100;
     }
     
@@ -256,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 更新强度文本
-    strengthText.textContent = `密码强度: ${strength.label}`;
+    strengthText.textContent = chrome.i18n.getMessage("passwordStrengthText", [strength.label]);
   }
   
   // 生成密码按钮点击事件
@@ -269,6 +360,13 @@ document.addEventListener('DOMContentLoaded', function() {
       useSymbols: useSymbolsCheckbox.checked,
       excludeChars: excludeCharsInput.value
     };
+    
+    // 检查是否至少选择了一种字符类型
+    if (!options.useNumbers && !options.useLowercase && 
+        !options.useUppercase && !options.useSymbols) {
+      showNotification(chrome.i18n.getMessage("errorCharTypeRequired"));
+      return;
+    }
     
     const password = generateRandomPassword(options);
     
@@ -286,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
       copyToClipboard(passwordInput.value);
       
       // 显示通知
-      showNotification("密码已复制到剪贴板");
+      showNotification(chrome.i18n.getMessage("copiedToClipboard"));
       
       // 保存到历史记录（仅在页面内有限度使用）
       savePasswordToHistory(passwordInput.value);
@@ -296,9 +394,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // 全部显示/隐藏密码按钮点击事件
   toggleAllPasswordsBtn.addEventListener('click', function() {
     allPasswordsVisible = !allPasswordsVisible;
+    const passwordMask = chrome.i18n.getMessage('passwordMask');
     
     if (allPasswordsVisible) {
-      this.innerHTML = '<i class="fas fa-eye-slash"></i> 全部隐藏';
+      this.innerHTML = '<i class="fas fa-eye-slash"></i> ' + chrome.i18n.getMessage("hideAllText");
       document.querySelectorAll('.password-mask').forEach(span => {
         const passwordBtn = span.closest('.password-value').querySelector('.toggle-history-password');
         if (passwordBtn) {
@@ -308,11 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     } else {
-      this.innerHTML = '<i class="fas fa-eye"></i> 全部显示';
+      this.innerHTML = '<i class="fas fa-eye"></i> ' + chrome.i18n.getMessage("showAllText");
       document.querySelectorAll('.password-mask').forEach(span => {
         const passwordBtn = span.closest('.password-value').querySelector('.toggle-history-password');
         if (passwordBtn) {
-          span.textContent = '••••••••••••';
+          span.textContent = passwordMask;
           passwordBtn.innerHTML = '<i class="fas fa-eye"></i>';
         }
       });
@@ -323,14 +422,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
       .then(() => {
-        copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> ' + chrome.i18n.getMessage("copiedText");
         setTimeout(() => {
-          copyBtn.innerHTML = '<i class="fas fa-copy"></i> 复制';
+          copyBtn.innerHTML = '<i class="fas fa-copy"></i> ' + chrome.i18n.getMessage("copyBtnText");
         }, 1500);
       })
       .catch(err => {
         console.error('复制失败:', err);
-        showNotification("复制失败，请手动复制");
+        showNotification(chrome.i18n.getMessage("copyFailedText"));
       });
   }
   
@@ -346,6 +445,12 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 保存密码到历史记录
   function savePasswordToHistory(password) {
+    // 如果历史记录功能被禁用，则不保存
+    if (!enableHistoryCheckbox.checked) {
+      console.log('History saving is disabled');
+      return;
+    }
+    
     // 获取当前标签页的URL
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       if (tabs && tabs[0]) {
@@ -382,10 +487,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 保存历史记录
             chrome.storage.local.set({passwordHistory: history}, function() {
-              console.log('密码已保存到历史记录');
+              console.log(chrome.i18n.getMessage('passwordSavedToHistory'));
             });
           } else {
-            console.log('跳过重复密码记录');
+            console.log(chrome.i18n.getMessage('passwordDuplicate'));
             
             // 找到现有记录的索引
             const existingIndex = history.findIndex(item => 
@@ -404,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
               
               // 保存更新后的历史记录
               chrome.storage.local.set({passwordHistory: history}, function() {
-                console.log('已更新重复密码记录的时间戳并移至首位');
+                console.log(chrome.i18n.getMessage('passwordDuplicateUpdated'));
               });
             }
           }
@@ -417,7 +522,25 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadPasswordHistory() {
     // 重置密码可见状态
     allPasswordsVisible = false;
-    toggleAllPasswordsBtn.innerHTML = '<i class="fas fa-eye"></i> 全部显示';
+    toggleAllPasswordsBtn.innerHTML = '<i class="fas fa-eye"></i> ' + chrome.i18n.getMessage("showAllText");
+    
+    // 检查是否启用了历史记录
+    if (!enableHistoryCheckbox.checked) {
+      historyList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-ban"></i>
+          <p>${chrome.i18n.getMessage("historyDisabledText")}</p>
+        </div>
+      `;
+      
+      // 禁用清空按钮和导出按钮
+      clearHistoryBtn.disabled = true;
+      clearHistoryBtn.classList.add('disabled');
+      exportBtn.disabled = true;
+      exportBtn.classList.add('disabled');
+      
+      return;
+    }
     
     chrome.storage.local.get(['passwordHistory'], function(result) {
       const history = result.passwordHistory || [];
@@ -426,11 +549,24 @@ document.addEventListener('DOMContentLoaded', function() {
         historyList.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-history"></i>
-            <p>暂无历史记录</p>
+            <p>${chrome.i18n.getMessage("emptyHistoryText")}</p>
           </div>
         `;
+        
+        // 禁用清空按钮和导出按钮
+        clearHistoryBtn.disabled = true;
+        clearHistoryBtn.classList.add('disabled');
+        exportBtn.disabled = true;
+        exportBtn.classList.add('disabled');
+        
         return;
       }
+      
+      // 当有历史记录时启用按钮
+      clearHistoryBtn.disabled = false;
+      clearHistoryBtn.classList.remove('disabled');
+      exportBtn.disabled = false;
+      exportBtn.classList.remove('disabled');
       
       // 按网站分组历史记录
       const groupedHistory = {};
@@ -465,9 +601,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 如果有更多记录，添加"展开更多"按钮
         if (items.length > 3) {
+          const moreCount = items.length - 3;
           historyHTML += `
             <div class="hidden-records" data-domain="${domain}">
-              <i class="fas fa-chevron-down"></i> 还有 ${items.length - 3} 条记录，点击展开
+              <i class="fas fa-chevron-down"></i> ${chrome.i18n.getMessage("moreRecordsText", [moreCount])}
             </div>
             <div class="more-records" style="display: none;" data-domain="${domain}">
             </div>
@@ -492,10 +629,11 @@ document.addEventListener('DOMContentLoaded', function() {
           if (moreRecordsContainer.innerHTML.trim()) {
             if (moreRecordsContainer.style.display === 'none') {
               moreRecordsContainer.style.display = 'block';
-              this.innerHTML = `<i class="fas fa-chevron-up"></i> 点击收起`;
+              this.innerHTML = `<i class="fas fa-chevron-up"></i> ${chrome.i18n.getMessage("collapseRecordsText")}`;
             } else {
               moreRecordsContainer.style.display = 'none';
-              this.innerHTML = `<i class="fas fa-chevron-down"></i> 还有 ${groupedHistory[domain].length - 3} 条记录，点击展开`;
+              const moreCount = groupedHistory[domain].length - 3;
+              this.innerHTML = `<i class="fas fa-chevron-down"></i> ${chrome.i18n.getMessage("moreRecordsText", [moreCount])}`;
             }
             return;
           }
@@ -509,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           moreRecordsContainer.innerHTML = moreHTML;
           moreRecordsContainer.style.display = 'block';
-          this.innerHTML = `<i class="fas fa-chevron-up"></i> 点击收起`;
+          this.innerHTML = `<i class="fas fa-chevron-up"></i> ${chrome.i18n.getMessage("collapseRecordsText")}`;
           
           // 添加新加载的密码条目的事件监听
           addPasswordEntryListeners();
@@ -532,9 +670,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 创建密码条目HTML
   function createPasswordEntryHTML(item, index) {
+    const passwordMask = chrome.i18n.getMessage('passwordMask');
     return `
       <div class="password-value">
-        <span class="password-mask">••••••••••••</span>
+        <span class="password-mask">${passwordMask}</span>
         <div class="password-actions">
           <button class="small-btn toggle-history-password" data-password="${item.password}">
             <i class="fas fa-eye"></i>
@@ -553,12 +692,13 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.addEventListener('click', function() {
         const passwordSpan = this.closest('.password-value').querySelector('.password-mask');
         const password = this.dataset.password;
+        const passwordMask = chrome.i18n.getMessage('passwordMask');
         
-        if (passwordSpan.textContent === '••••••••••••') {
+        if (passwordSpan.textContent === passwordMask) {
           passwordSpan.textContent = password;
           this.innerHTML = '<i class="fas fa-eye-slash"></i>';
         } else {
-          passwordSpan.textContent = '••••••••••••';
+          passwordSpan.textContent = passwordMask;
           this.innerHTML = '<i class="fas fa-eye"></i>';
         }
       });
@@ -567,49 +707,52 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.copy-history-password').forEach(btn => {
       btn.addEventListener('click', function() {
         copyToClipboard(this.dataset.password);
-        showNotification("密码已复制到剪贴板");
+        showNotification(chrome.i18n.getMessage("copiedToClipboard"));
       });
     });
   }
   
-  // 清空历史记录
+  // 清空历史记录按钮点击事件
   clearHistoryBtn.addEventListener('click', function() {
-    if (confirm('确定要清空所有密码历史记录吗？此操作不可撤销。')) {
+    if (confirm(chrome.i18n.getMessage('confirmClearHistory'))) {
       chrome.storage.local.remove(['passwordHistory'], function() {
-        showNotification('所有密码历史记录已清空');
+        showNotification(chrome.i18n.getMessage('allHistoryCleared'));
+        
+        // 重新加载历史记录，按钮状态会自动更新
         loadPasswordHistory();
       });
     }
   });
   
-  // 导出密码历史记录
+  // 导出历史记录按钮点击事件
   exportBtn.addEventListener('click', function() {
     chrome.storage.local.get(['passwordHistory'], function(result) {
       const history = result.passwordHistory || [];
       
       if (history.length === 0) {
-        showNotification("没有历史记录可导出");
+        showNotification(chrome.i18n.getMessage('noHistoryToExport'));
         return;
       }
       
-      // 格式化为CSV
-      let csv = "domain,url,password,timestamp\n";
+      // 创建CSV内容
+      let csvContent = chrome.i18n.getMessage('csvHeaderRow') + "\n";
       history.forEach(item => {
-        csv += `"${item.domain}","${item.url}","${item.password}","${item.timestamp}"\n`;
+        csvContent += `"${item.domain}","${item.url}","${item.password}","${item.timestamp}"\n`;
       });
       
-      // 创建下载链接
-      const blob = new Blob([csv], { type: 'text/csv' });
+      // 创建Blob并下载
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `password_history_${formatDate(new Date())}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', chrome.i18n.getMessage('csvExportFilename'));
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      showNotification("历史记录已导出");
+      showNotification(chrome.i18n.getMessage('historyExported'));
     });
   });
   
@@ -632,9 +775,24 @@ document.addEventListener('DOMContentLoaded', function() {
     excludeChars: excludeCharsInput.value
   };
   
-  const initialPassword = generateRandomPassword(options);
-  passwordInput.value = initialPassword;
-  updateStrengthIndicator(initialPassword);
+  // 确保至少选择了一种字符类型
+  if (options.useNumbers || options.useLowercase || options.useUppercase || options.useSymbols) {
+    const initialPassword = generateRandomPassword(options);
+    if (initialPassword) {
+      passwordInput.value = initialPassword;
+      updateStrengthIndicator(initialPassword);
+    }
+  } else {
+    // 默认选中数字复选框
+    useNumbersCheckbox.checked = true;
+    options.useNumbers = true;
+    
+    const initialPassword = generateRandomPassword(options);
+    if (initialPassword) {
+      passwordInput.value = initialPassword;
+      updateStrengthIndicator(initialPassword);
+    }
+  }
   
   // 添加输入监听，实时更新密码强度
   passwordInput.addEventListener('input', function() {

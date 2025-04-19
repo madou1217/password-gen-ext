@@ -10,5 +10,195 @@
   "passwordPatterns": {
     "message": "password,passwd,pwd,pass,passcode,密码,口令,暗码,密匙,验证码",
     "description": "常见密码字段标识符（逗号分隔）"
+  },
+  "generateTab": {
+    "message": "密码生成器",
+    "description": "密码生成器选项卡名称"
+  },
+  "historyTab": {
+    "message": "历史记录",
+    "description": "历史记录选项卡名称"
+  },
+  "generateBtnText": {
+    "message": "生成",
+    "description": "生成密码按钮文本"
+  },
+  "copyBtnText": {
+    "message": "复制",
+    "description": "复制密码按钮文本"
+  },
+  "copiedText": {
+    "message": "已复制",
+    "description": "复制密码后显示的文本"
+  },
+  "useCharsText": {
+    "message": "使用字符:",
+    "description": "字符类型选择标签"
+  },
+  "passwordLengthText": {
+    "message": "密码长度:",
+    "description": "密码长度设置标签"
+  },
+  "excludeCharsText": {
+    "message": "排除字符:",
+    "description": "排除字符设置标签"
+  },
+  "enableHistoryText": {
+    "message": "启用历史记录:",
+    "description": "历史记录开关标签"
+  },
+  "enableHistoryDescription": {
+    "message": "保存生成的密码到本地历史记录",
+    "description": "历史记录功能描述"
+  },
+  "historyDisabledText": {
+    "message": "历史记录功能已禁用",
+    "description": "历史记录功能禁用时显示的文本"
+  },
+  "excludeCharsPlaceholder": {
+    "message": "例如: A10B",
+    "description": "排除字符输入框占位符"
+  },
+  "rightClickTipText": {
+    "message": "在密码输入框上右键点击并选择\"生成随机密码\"，可以直接填充密码",
+    "description": "右键使用提示文本"
+  },
+  "passwordHistoryText": {
+    "message": "密码历史记录",
+    "description": "密码历史记录标题"
+  },
+  "showAllText": {
+    "message": "全部显示",
+    "description": "显示所有密码按钮文本"
+  },
+  "hideAllText": {
+    "message": "全部隐藏",
+    "description": "隐藏所有密码按钮文本"
+  },
+  "clearHistoryText": {
+    "message": "清空记录",
+    "description": "清空历史记录按钮文本"
+  },
+  "exportText": {
+    "message": "导出记录",
+    "description": "导出记录按钮文本"
+  },
+  "emptyHistoryText": {
+    "message": "暂无历史记录",
+    "description": "历史记录为空时显示的文本"
+  },
+  "passwordStrengthText": {
+    "message": "密码强度: $STRENGTH$",
+    "description": "密码强度指示器文本",
+    "placeholders": {
+      "strength": {
+        "content": "$1"
+      }
+    }
+  },
+  "weakText": {
+    "message": "弱",
+    "description": "弱密码强度文本"
+  },
+  "mediumText": {
+    "message": "中",
+    "description": "中等密码强度文本"
+  },
+  "strongText": {
+    "message": "强",
+    "description": "强密码强度文本"
+  },
+  "veryStrongText": {
+    "message": "非常强",
+    "description": "非常强密码强度文本"
+  },
+  "errorCharTypeRequired": {
+    "message": "错误：请至少选择一种字符类型",
+    "description": "未选择字符类型时的错误消息"
+  },
+  "errorTooManyExcluded": {
+    "message": "错误：排除字符过多，无法生成密码",
+    "description": "排除字符过多时的错误消息"
+  },
+  "copiedToClipboard": {
+    "message": "密码已复制到剪贴板",
+    "description": "复制密码后的通知消息"
+  },
+  "copyFailedText": {
+    "message": "复制失败，请手动复制",
+    "description": "复制失败时显示的消息"
+  },
+  "confirmClearHistory": {
+    "message": "确定要清空所有密码历史记录吗？此操作不可撤销。",
+    "description": "清空历史记录的确认消息"
+  },
+  "allHistoryCleared": {
+    "message": "所有密码历史记录已清空",
+    "description": "清空所有历史后显示的消息"
+  },
+  "noHistoryToExport": {
+    "message": "没有历史记录可导出",
+    "description": "尝试导出空历史记录时显示的消息"
+  },
+  "historyExported": {
+    "message": "历史记录已导出",
+    "description": "导出历史记录后显示的消息"
+  },
+  "moreRecordsText": {
+    "message": "还有 $COUNT$ 条记录，点击展开",
+    "description": "显示更多记录按钮文本",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "collapseRecordsText": {
+    "message": "点击收起",
+    "description": "收起已展开记录的文本"
+  },
+  "noPasswordFieldFound": {
+    "message": "未找到密码输入框，请确认光标在密码框内",
+    "description": "未找到密码输入框时显示的消息"
+  },
+  "passwordGeneratedAndCopied": {
+    "message": "密码已生成并复制到剪贴板",
+    "description": "密码生成并成功复制后显示的消息"
+  },
+  "passwordGeneratedCopyFailed": {
+    "message": "密码已生成，但复制失败，请手动复制",
+    "description": "密码生成但复制失败时显示的消息"
+  },
+  "clipboardOperationFailed": {
+    "message": "密码已生成，但操作剪贴板失败，请手动复制",
+    "description": "操作剪贴板失败时显示的消息"
+  },
+  "passwordSavedToHistory": {
+    "message": "密码已保存到历史记录",
+    "description": "密码保存到历史记录时的控制台日志"
+  },
+  "passwordDuplicate": {
+    "message": "跳过重复密码记录",
+    "description": "跳过重复密码记录时的控制台日志"
+  },
+  "passwordDuplicateUpdated": {
+    "message": "已更新重复密码记录的时间戳并移至首位",
+    "description": "更新重复密码记录时的控制台日志"
+  },
+  "passwordMask": {
+    "message": "••••••••••••",
+    "description": "用于隐藏密码的掩码"
+  },
+  "csvHeaderRow": {
+    "message": "domain,url,password,timestamp",
+    "description": "CSV导出文件的标题行"
+  },
+  "csvExportFilename": {
+    "message": "password_history.csv",
+    "description": "CSV导出的默认文件名"
+  },
+  "contextMenuGeneratePassword": {
+    "message": "生成随机密码",
+    "description": "生成随机密码的右键菜单项"
   }
 } 

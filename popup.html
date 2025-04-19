@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>随机密码生成器</title>
+  <title>__MSG_appName__</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     :root {
@@ -149,6 +149,21 @@
     
     button:active {
       transform: scale(0.97);
+    }
+    
+    button.disabled,
+    button:disabled {
+      background-color: #cccccc;
+      color: #888888;
+      cursor: not-allowed;
+      opacity: 0.7;
+      transform: none;
+    }
+    
+    button.disabled:hover,
+    button:disabled:hover {
+      background-color: #cccccc;
+      transform: none;
     }
     
     .settings {
@@ -482,12 +497,12 @@
 <body>
   <div class="container">
     <div class="tabs">
-      <div class="tab active" data-tab="generator">密码生成器</div>
-      <div class="tab" data-tab="history">历史记录</div>
+      <div class="tab active" data-tab="generator">__MSG_generateTab__</div>
+      <div class="tab" data-tab="history">__MSG_historyTab__</div>
     </div>
     
     <div class="tab-content active" id="generator-tab">
-      <h1>随机密码生成器</h1>
+      <h1>__MSG_appName__</h1>
       
       <div class="password-container">
         <div class="password-input-group">
@@ -495,10 +510,10 @@
             <input type="text" id="password" readonly>
           </div>
           <button id="generateBtn">
-            <i class="fas fa-sync-alt"></i> 生成
+            <i class="fas fa-sync-alt"></i> __MSG_generateBtnText__
           </button>
           <button id="copyBtn">
-            <i class="fas fa-copy"></i> 复制
+            <i class="fas fa-copy"></i> __MSG_copyBtnText__
           </button>
         </div>
         
@@ -510,7 +525,7 @@
       
       <div class="settings">
         <div class="settings-row">
-          <div class="settings-label">使用字符:</div>
+          <div class="settings-label">__MSG_useCharsText__</div>
           <div class="checkbox-group">
             <label class="checkbox-label">
               <input type="checkbox" id="useNumbers" checked>
@@ -532,7 +547,7 @@
         </div>
         
         <div class="settings-row">
-          <div class="settings-label">密码长度:</div>
+          <div class="settings-label">__MSG_passwordLengthText__</div>
           <div class="length-range">
             <input type="range" id="passwordLengthSlider" min="8" max="32" value="8">
             <input type="number" id="passwordLength" min="8" max="32" value="8" style="width: 60px;">
@@ -540,23 +555,32 @@
         </div>
         
         <div class="settings-row">
-          <div class="settings-label">排除字符:</div>
-          <input type="text" id="excludeChars" class="exclude-chars" placeholder="例如: A10B" value="">
+          <div class="settings-label">__MSG_excludeCharsText__</div>
+          <input type="text" id="excludeChars" class="exclude-chars" placeholder="__MSG_excludeCharsPlaceholder__" value="">
+        </div>
+        
+        <div class="settings-row">
+          <div class="settings-label">__MSG_enableHistoryText__</div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="enableHistory">
+            <label for="enableHistory"></label>
+            <span class="toggle-label">__MSG_enableHistoryDescription__</span>
+          </div>
         </div>
       </div>
       
       <div class="info">
         <i class="fas fa-info-circle"></i>
-        在密码输入框上右键点击并选择"生成随机密码"，可以直接填充密码
+        __MSG_rightClickTipText__
       </div>
     </div>
     
     <div class="tab-content" id="history-tab">
       <div class="history-header">
-        <h1>密码历史记录</h1>
+        <h1>__MSG_passwordHistoryText__</h1>
         <div class="history-actions">
           <button id="toggleAllPasswordsBtn" class="toggle-all-passwords">
-            <i class="fas fa-eye"></i> 全部显示
+            <i class="fas fa-eye"></i> __MSG_showAllText__
           </button>
         </div>
       </div>
@@ -564,15 +588,15 @@
         <!-- 历史记录由JavaScript动态填充 -->
         <div class="empty-state">
           <i class="fas fa-history"></i>
-          <p>暂无历史记录</p>
+          <p>__MSG_emptyHistoryText__</p>
         </div>
       </div>
       <div class="action-buttons">
         <button id="clearHistoryBtn" class="small-btn" style="background-color: var(--danger-color); color: white; border: none;">
-          <i class="fas fa-trash-alt"></i> 清空记录
+          <i class="fas fa-trash-alt"></i> __MSG_clearHistoryText__
         </button>
         <button id="exportBtn">
-          <i class="fas fa-file-export"></i> 导出记录
+          <i class="fas fa-file-export"></i> __MSG_exportText__
         </button>
       </div>
     </div>
@@ -580,6 +604,8 @@
   
   <div class="notification" id="notification"></div>
   
+  <!-- 本地化脚本，需要在主脚本之前加载 -->
+  <script src="localize.js"></script>
   <script src="popup.js"></script>
 </body>
 </html> 
