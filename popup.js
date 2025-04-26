@@ -80,13 +80,112 @@ document.addEventListener('DOMContentLoaded', function() {
   // 在DOM加载完成后初始化i18n
   initializeI18n();
   
-  // 加载历史记录设置
-  chrome.storage.local.get(['enableHistory'], function(result) {
-    // 如果之前保存过设置，则使用保存的设置
-    if (result.enableHistory !== undefined) {
-      enableHistoryCheckbox.checked = result.enableHistory;
+  // 加载保存的设置
+  loadSettings();
+  
+  // 保存当前设置
+  function saveSettings() {
+    const settings = {
+      length: parseInt(passwordLengthInput.value, 10),
+      useNumbers: useNumbersCheckbox.checked,
+      useLowercase: useLowercaseCheckbox.checked,
+      useUppercase: useUppercaseCheckbox.checked,
+      useSymbols: useSymbolsCheckbox.checked,
+      excludeChars: excludeCharsInput.value
+    };
+    
+    chrome.storage.local.set({
+      passwordSettings: settings
+    }, function() {
+      console.log('密码设置已保存');
+    });
+  }
+  
+  // 为字符类型复选框添加change事件监听器
+  useNumbersCheckbox.addEventListener('change', saveSettings);
+  useLowercaseCheckbox.addEventListener('change', saveSettings);
+  useUppercaseCheckbox.addEventListener('change', saveSettings);
+  useSymbolsCheckbox.addEventListener('change', saveSettings);
+  
+  // 在页面加载时自动生成一个密码并加载历史记录
+  function generateInitialPassword() {
+    const options = {
+      length: parseInt(passwordLengthInput.value, 10),
+      useNumbers: useNumbersCheckbox.checked,
+      useLowercase: useLowercaseCheckbox.checked,
+      useUppercase: useUppercaseCheckbox.checked,
+      useSymbols: useSymbolsCheckbox.checked,
+      excludeChars: excludeCharsInput.value
+    };
+    
+    // 确保至少选择了一种字符类型
+    if (options.useNumbers || options.useLowercase || options.useUppercase || options.useSymbols) {
+      const initialPassword = generateRandomPassword(options);
+      if (initialPassword) {
+        passwordInput.value = initialPassword;
+        updateStrengthIndicator(initialPassword);
+      }
+    } else {
+      // 默认选中数字复选框
+      useNumbersCheckbox.checked = true;
+      options.useNumbers = true;
+      
+      // 重新保存设置
+      saveSettings();
+      
+      const initialPassword = generateRandomPassword(options);
+      if (initialPassword) {
+        passwordInput.value = initialPassword;
+        updateStrengthIndicator(initialPassword);
+      }
     }
-  });
+  }
+  
+  // 加载密码生成设置
+  function loadSettings() {
+    chrome.storage.local.get(['passwordSettings', 'enableHistory'], function(result) {
+      // 加载密码生成设置
+      if (result.passwordSettings) {
+        const settings = result.passwordSettings;
+        
+        // 设置密码长度
+        if (settings.length !== undefined) {
+          passwordLengthInput.value = settings.length;
+          passwordLengthSlider.value = settings.length;
+        }
+        
+        // 设置字符类型复选框
+        if (settings.useNumbers !== undefined) {
+          useNumbersCheckbox.checked = settings.useNumbers;
+        }
+        
+        if (settings.useLowercase !== undefined) {
+          useLowercaseCheckbox.checked = settings.useLowercase;
+        }
+        
+        if (settings.useUppercase !== undefined) {
+          useUppercaseCheckbox.checked = settings.useUppercase;
+        }
+        
+        if (settings.useSymbols !== undefined) {
+          useSymbolsCheckbox.checked = settings.useSymbols;
+        }
+        
+        // 设置排除字符
+        if (settings.excludeChars !== undefined) {
+          excludeCharsInput.value = settings.excludeChars;
+        }
+      }
+      
+      // 加载历史记录设置
+      if (result.enableHistory !== undefined) {
+        enableHistoryCheckbox.checked = result.enableHistory;
+      }
+      
+      // 设置加载完成后生成初始密码
+      generateInitialPassword();
+    });
+  }
   
   // 监听历史记录开关变化 - 更新文本并重新加载历史记录
   enableHistoryCheckbox.addEventListener('change', function() {
@@ -118,6 +217,9 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
+    // 保存其他密码设置
+    saveSettings();
+    
     // 如果当前是历史标签页，则重新加载历史记录
     if (document.querySelector('.tab[data-tab="history"]').classList.contains('active')) {
       loadPasswordHistory();
@@ -127,10 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // 同步密码长度输入框和滑块
   passwordLengthInput.addEventListener('input', function() {
     passwordLengthSlider.value = this.value;
+    saveSettings(); // 保存设置
   });
   
   passwordLengthSlider.addEventListener('input', function() {
     passwordLengthInput.value = this.value;
+    saveSettings(); // 保存设置
   });
   
   // 处理排除字符输入，自动去重和转换为半角字符
@@ -145,6 +249,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (halfWidthText !== this.value) {
       this.value = halfWidthText;
     }
+    
+    saveSettings(); // 保存设置
   });
   
   // 将全角字符转换为半角字符
@@ -763,35 +869,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function padZero(num) {
     return num.toString().padStart(2, '0');
-  }
-  
-  // 页面加载时自动生成一个密码并加载历史记录
-  const options = {
-    length: parseInt(passwordLengthInput.value, 10),
-    useNumbers: useNumbersCheckbox.checked,
-    useLowercase: useLowercaseCheckbox.checked,
-    useUppercase: useUppercaseCheckbox.checked,
-    useSymbols: useSymbolsCheckbox.checked,
-    excludeChars: excludeCharsInput.value
-  };
-  
-  // 确保至少选择了一种字符类型
-  if (options.useNumbers || options.useLowercase || options.useUppercase || options.useSymbols) {
-    const initialPassword = generateRandomPassword(options);
-    if (initialPassword) {
-      passwordInput.value = initialPassword;
-      updateStrengthIndicator(initialPassword);
-    }
-  } else {
-    // 默认选中数字复选框
-    useNumbersCheckbox.checked = true;
-    options.useNumbers = true;
-    
-    const initialPassword = generateRandomPassword(options);
-    if (initialPassword) {
-      passwordInput.value = initialPassword;
-      updateStrengthIndicator(initialPassword);
-    }
   }
   
   // 添加输入监听，实时更新密码强度
